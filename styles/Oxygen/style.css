@@ -1,0 +1,48 @@
+/* Styles for pun_subforums extension */
+
+/* Index page */
+dl.index-subforums {
+	margin: 0 0 0 1.5em;
+}
+
+dl.index-subforums-level1 {
+	border-top: 1px dashed #dfe6ed;
+	margin-top: 0.5em;
+	padding-top: 0.5em;
+}
+
+dl.index-subforums-level2 dt,
+dl.index-subforums-level3 dt,
+dl.index-subforums-level4 dt,
+dl.index-subforums-level5 dt,
+dl.index-subforums-level6 dt {
+	display: none;
+}
+dl.index-subforums dd {
+	display: list-item;
+	list-style: disc inside;
+}
+
+.brd .main-content .main-item .item-subject,
+.brd .main-content .main-item li {
+	/* Long borders */
+	margin-bottom: -49.7em;
+	padding-bottom: 50.4em;
+}
+
+/* Footer & Admin->Forums */
+optgroup {
+	background: #e4e4ec;
+}
+
+option {
+	background: #fff;
+}
+option.option-subforums-self {
+	background: #ffe4e4;
+}
+
+/* View forum page */
+div.vf-subforum div.item-subject h3 {
+	font-weight: bold;
+}
