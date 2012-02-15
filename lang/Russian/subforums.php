@@ -3,7 +3,7 @@
 // Language definitions used in subforums
 $lang_xn_subforums = array(
 	'Set parent forum label'	=> 'Установить надфорум',
-	'Without parent'			=> '— Без надфорума —',
+	'Without parent'			=> '(Без надфорума)',
 	'Subforum'					=> 'Подфорум',
 	'Subforums'					=> 'Подфорумы',
 	'Create subforum'			=> 'Создать подфорум',

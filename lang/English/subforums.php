@@ -3,7 +3,7 @@
 // Language definitions used in subforums
 $lang_xn_subforums = array(
 	'Set parent forum label'	=> 'Set parent forum',
-	'Without parent'			=> '-- Without parent --',
+	'Without parent'			=> '(Without parent)',
 	'Subforum'					=> 'Subforum',
 	'Subforums'					=> 'Subforums',
 	'Create subforum'			=> 'Create subforum',
