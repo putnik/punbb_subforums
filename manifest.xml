@@ -89,6 +89,13 @@ $forum_db->query_build($query) or error(__FILE__, __LINE__);
 
 	<hooks>
 
+		<hook id="co_common"><![CDATA[
+
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
+
+		]]></hook>
+
 		<hook id="hd_head"><![CDATA[
 
 // Incuding styles for subforums extension
@@ -106,15 +113,6 @@ if (FORUM_PAGE == 'admin-forums') {
 	$forum_head['js_subforums'] = '<script type="text/javascript" src="' . $ext_info['url'] . '/admin_forums.js"></script>';
 }
 
-		]]></hook>
-
-		<hook id="in_main_output_start"><![CDATA[
-
-// If we need to show subforums on index page
-if ((!$forum_user['is_guest'] && $forum_user['show_subforums_list']) || ($forum_user['is_guest'] && $forum_config['o_subforums_show_list'])) {
-	// Load subforums class
-	require_once $ext_info['path'] . '/subforums.class.php';
-}
 		]]></hook>
 
 		<hook id="in_qr_get_cats_and_forums"><![CDATA[
@@ -138,9 +136,6 @@ if ((!$forum_user['is_guest'] && $forum_user['show_subforums_list']) || ($forum_
 
 // Load the index.php language file
 require FORUM_ROOT . 'lang/' . $forum_user['language'] . '/index.php';
-
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
 
 // Generate subforums hierarchy
 $subforums->add_crumbs($id);
@@ -294,18 +289,12 @@ if ($forum_config['o_subforums_plain_view'] == 1 && ($forum_db->num_rows($subfor
 
 		<hook id="vt_pre_header_load"><![CDATA[
 
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
-
 // Generate subforums hierarchy
 $subforums->add_crumbs($cur_topic['forum_id']);
 
 		]]></hook>
 
 		<hook id="po_pre_header_load"><![CDATA[
-
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
 
 // Generate subforums hierarchy
 $subforums->add_crumbs($cur_posting['id']);
@@ -314,18 +303,12 @@ $subforums->add_crumbs($cur_posting['id']);
 
 		<hook id="ed_pre_header_load"><![CDATA[
 
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
-
 // Generate subforums hierarchy
 $subforums->add_crumbs($cur_post['fid']);
 
 		]]></hook>
 
 		<hook id="se_qr_get_cats_and_forums"><![CDATA[
-
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
 
 $query['WHERE'] = '(' . $query['WHERE'] . ') AND f.parent_id = 0';
 
@@ -339,9 +322,6 @@ $query['WHERE'] = '(' . $query['WHERE'] . ') AND f.parent_id = 0';
 if (isset($_POST['add_forum']) && !empty($_POST['set_parent']) && empty($_POST['add_to_cat'])) {
 	$_POST['add_to_cat'] = 1;
 }
-
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
 
 		]]></hook>
 
@@ -556,9 +536,6 @@ if (!isset($form['subforums_create_link']) || $form['subforums_create_link'] != 
 
 		<hook id="aop_features_pre_general_fieldset_end"><![CDATA[
 
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
-
 // Show checkbox for plain view
 echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">' .
 	'<div class="sf-box checkbox">' .
@@ -597,9 +574,6 @@ $form['show_subforums_list'] = isset($_POST['form']['show_subforums_list']) ? in
 		]]></hook>
 
 		<hook id="pf_change_details_settings_pre_image_display_fieldset"><![CDATA[
-
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
 
 // Add mode selection
 ?>
@@ -641,9 +615,6 @@ $query['WHERE'] = '(' . $query['WHERE'] . ') AND f.parent_id = 0';
 
 // Empty variable for <ch_fn_generate_quickjump_cache_forum_loop_start>
 $subforums_parent_id = 0;
-
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
 */
 
 		]]></hook>
@@ -668,9 +639,6 @@ $query['VALUES'] .= ', ' . $forum_config['o_subforums_show_list'];
 		]]></hook>
 
 		<hook id="fn_sync_forum_qr_get_forum_stats"><![CDATA[
-
-// Load subforums class
-require_once $ext_info['path'] . '/subforums.class.php';
 
 $query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ')';
 
