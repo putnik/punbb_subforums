@@ -4,7 +4,7 @@
 <extension engine="1.0">
 	<id>subforums</id>
 	<title>Subforums</title>
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<description>Add multilevel subforums. See options in Administration → Settings → Features.</description>
 	<author>Sergey "putnik" Leschina</author>
 	<minversion>1.4</minversion>
@@ -133,21 +133,8 @@ if (FORUM_PAGE == 'admin-forums') {
 
 // If we need to show subforums on index page
 if ((!$forum_user['is_guest'] && $forum_user['show_subforums_list']) || ($forum_user['is_guest'] && $forum_config['o_subforums_show_list'])) {
-	// Get subforums table
-	require_once $ext_info['path'] . '/functions.php';
-	if (!isset($subforums)) {
-		$subforums = subforums_get();
-	}
-
-	// If exist any subforums load extension language file
-	if (!empty($subforums)) {
-		if (file_exists($ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php')) {
-			require $ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php';
-		}
-		else {
-			require $ext_info['path'] . '/lang/English/' . $ext_info['id'] . '.php';
-		}
-	}
+	// Load subforums class
+	require_once $ext_info['path'] . '/subforums.class.php';
 }
 		]]></hook>
 
@@ -163,7 +150,7 @@ $query['WHERE'] = '(' . $query['WHERE'] . ') AND f.parent_id = 0';
 // If we need to show subforums on index page
 // Add subforums into forum description
 if ((!$forum_user['is_guest'] && $forum_user['show_subforums_list']) || ($forum_user['is_guest'] && $forum_config['o_subforums_show_list'])) {
-	$forum_page['item_body']['subject']['subforums'] = subforums_index_desc($cur_forum['fid'], 1);
+	$forum_page['item_body']['subject']['subforums'] = $subforums->get_index_desc($cur_forum['fid'], 1);
 }
 
 		]]></hook>
@@ -173,26 +160,18 @@ if ((!$forum_user['is_guest'] && $forum_user['show_subforums_list']) || ($forum_
 // Load the index.php language file
 require FORUM_ROOT . 'lang/' . $forum_user['language'] . '/index.php';
 
-// Load functions file
-require_once $ext_info['path'] . '/functions.php';
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 // Generate subforums hierarchy
-subforums_add_crumbs($id);
+$subforums->add_crumbs($id);
 
 // Load the viewforum.php language file
 require FORUM_ROOT.'lang/' . $forum_user['language'] . '/forum.php';
 
-// Load extension language file
-if (file_exists($ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php')) {
-	require $ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php';
-}
-else {
-	require $ext_info['path'] . '/lang/English/' . $ext_info['id'] . '.php';
-}
-
 // If 'o_subforums_create_link' show create forum link
 if ($forum_page['is_admmod'] && $forum_config['o_subforums_create_link']) {
-	$forum_page['main_head_options']['add_subforum'] = '<strong class="info-create-subforum"><a href="' . forum_link($forum_url['admin_forums']) . '?parent=' . $id . '">' . $lang_xn_subforums['Create subforum'] . '</a></strong>';
+	$forum_page['main_head_options']['add_subforum'] = '<strong class="info-create-subforum"><a href="' . forum_link($forum_url['admin_forums']) . '?parent=' . $id . '">' . $subforums->lang['Create subforum'] . '</a></strong>';
 }
 
 // Select info about subforums
@@ -218,7 +197,7 @@ $subforums_result = $forum_db->query_build($subforums_query) or error(__FILE__, 
 if ($forum_config['o_subforums_plain_view'] != 1 && ($forum_db->num_rows($subforums_result) || !empty($subforums_force_list))) {
 	// Headers
 	// -> .main-head
-	$forum_page['subforums_info'] = $lang_xn_subforums['Subforums'] . ' [ ' . $forum_db->num_rows($subforums_result) . ' ]';
+	$forum_page['subforums_info'] = $subforums->lang['Subforums'] . ' [ ' . $forum_db->num_rows($subforums_result) . ' ]';
 
 	$forum_page['subforums_header'] = array();
 	$forum_page['subforums_header']['subject']['title'] = '<strong class="subject-title">' . $lang_index['Forums'] . '</strong>';
@@ -306,7 +285,7 @@ if ($forum_config['o_subforums_plain_view'] == 1 && ($forum_db->num_rows($subfor
 if ($forum_config['o_subforums_plain_view'] == 1 && ($forum_db->num_rows($subforums_result) || !empty($subforums_force_list))) {
 	// Headers
 	// -> .main-head
-	$forum_page['subforums_info'] = $lang_xn_subforums['Subforums'] .' [ '. $forum_db->num_rows($subforums_result) .' ]';
+	$forum_page['subforums_info'] = $subforums->lang['Subforums'] .' [ '. $forum_db->num_rows($subforums_result) .' ]';
 	echo "<div class=\"main-head\">".
 		 "<h2 class=\"hn\"><span>". $forum_page['subforums_info'] ."</span></h2>".
 		 '</div>';
@@ -336,55 +315,44 @@ if ($forum_config['o_subforums_plain_view'] == 1 && ($forum_db->num_rows($subfor
 
 		<hook id="vt_pre_header_load"><![CDATA[
 
-// Load functions file
-require_once $ext_info['path'] . '/functions.php';
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 // Generate subforums hierarchy
-subforums_add_crumbs($cur_topic['forum_id']);
+$subforums->add_crumbs($cur_topic['forum_id']);
 
 		]]></hook>
 
 		<hook id="po_pre_header_load"><![CDATA[
 
-// Load functions file
-require_once $ext_info['path'] . '/functions.php';
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 // Generate subforums hierarchy
-subforums_add_crumbs($cur_posting['id']);
+$subforums->add_crumbs($cur_posting['id']);
 
 		]]></hook>
 
 		<hook id="ed_pre_header_load"><![CDATA[
 
-// Load functions file
-require_once $ext_info['path'] . '/functions.php';
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 // Generate subforums hierarchy
-subforums_add_crumbs($cur_post['fid']);
+$subforums->add_crumbs($cur_post['fid']);
 
 		]]></hook>
 
 		<hook id="se_qr_get_cats_and_forums"><![CDATA[
 
-// Get subforums table
-require_once $ext_info['path'] . '/functions.php';
-if (!isset($subforums)) {
-	$subforums = subforums_get();
-}
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 $query['WHERE'] = '(' . $query['WHERE'] . ') AND f.parent_id = 0';
 
 		]]></hook>
 
 		<hook id="afo_start"><![CDATA[
-
-// Load extension language file
-if (file_exists($ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php')) {
-	require $ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php';
-}
-else {
-	require $ext_info['path'] . '/lang/English/' . $ext_info['id'] . '.php';
-}
 
 // Hack for empty category:
 //		$add_to_cat = isset($_POST['add_to_cat']) ? intval($_POST['add_to_cat']) : 0;
@@ -393,8 +361,8 @@ if (isset($_POST['add_forum']) && !empty($_POST['set_parent']) && empty($_POST['
 	$_POST['add_to_cat'] = 1;
 }
 
-// Load functions file - need for many hooks
-require_once $ext_info['path'] . '/functions.php';
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 		]]></hook>
 
@@ -411,11 +379,6 @@ if (!empty($_POST['parent_id']) && empty($_POST['cat_id'])) {
 
 		<hook id="afo_pre_new_forum_cat"><![CDATA[
 
-// Get subforums table
-if (!isset($subforums)) {
-	$subforums = subforums_get();
-}
-
 // 
 if (isset($_GET['parent'])) {
 	$parent_id = intval($_GET['parent']);
@@ -426,11 +389,11 @@ if (!isset($parent_id)) {
 	// Add full hierarchy
 	echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">' .
 		'<div class="sf-box select">' .
-		'<label for="fld' . (++$forum_page['fld_count']) . '"><span>' . $lang_xn_subforums['Set parent forum label'] . '</span></label><br />' .
+		'<label for="fld' . (++$forum_page['fld_count']) . '"><span>' . $subforums->lang['Set parent forum label'] . '</span></label><br />' .
 		'<span class="fld-input"><select id="fld'. $forum_page['fld_count'] .'" name="set_parent" onchange="changeParent(\'add_to_cat\', \'set_parent\');">';
 
 	// -> Empty value
-	echo '<option value="0">' . $lang_xn_subforums['Without parent'] . '</option>';
+	echo '<option value="0">' . $subforums->lang['Without parent'] . '</option>';
 
 	// -> Exist forums
 	$subforums_query = array(
@@ -448,8 +411,8 @@ if (!isset($parent_id)) {
 	$subforums_result = $forum_db->query_build($subforums_query) or error(__FILE__, __LINE__);
 
 	$parent_category = 0;
-	$forum_count = 0; // for subforums_option()
-	$subforums_tab = 7; // for subforums_option()
+	$forum_count = 0; // for $subforums->get_option()
+	$subforums_tab = 7; // for $subforums->get_option()
 	while ($cur_parent_forum = $forum_db->fetch_assoc($subforums_result)) {
 		if ($cur_parent_forum['cid'] != $parent_category) { // New category since last iteration
 			if ($parent_category) {
@@ -459,7 +422,7 @@ if (!isset($parent_id)) {
 			$parent_category = $cur_parent_forum['cid'];
 		}
 		echo '<option value="' . $cur_parent_forum['fid'] . '">' .forum_htmlencode($cur_parent_forum['forum_name']) . '</option>';
-		echo subforums_option($cur_parent_forum['fid'], 1);
+		echo $subforums->get_option($cur_parent_forum['fid'], 1);
 	}
 
 	// -> End of field
@@ -498,21 +461,16 @@ $query['SELECT'] .= ', f.parent_id';
 
 		<hook id="afo_edit_forum_pre_forum_cat"><![CDATA[
 
-// Get subforums table
-if (!isset($subforums)) {
-	$subforums = subforums_get();
-}
-
 // Add field into forum edit form
 echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">' .
 	'<div class="sf-box select">' .
 	'<label for="fld' . (++$forum_page['fld_count']) . '"><span>' .
-	$lang_xn_subforums['Set parent forum label'] . '</span></label><br />' .
+	$subforums->lang['Set parent forum label'] . '</span></label><br />' .
 	'<span class="fld-input"><select id="fld' . $forum_page['fld_count'] .
 	'" name="parent_id" onchange="changeParent(\'cat_id\', \'parent_id\');">';
 
 // -> Empty value
-echo '<option value="0">' . $lang_xn_subforums['Without parent'] . '</option>';
+echo '<option value="0">' . $subforums->lang['Without parent'] . '</option>';
 
 // -> Exist forums
 $subforums_query = array(
@@ -529,8 +487,8 @@ $subforums_query = array(
 );
 $subforums_result = $forum_db->query_build($subforums_query) or error(__FILE__, __LINE__);
 $parent_category = 0;
-$forum_count = 0; // for subforums_option()
-$subforums_tab = 7; // for subforums_option()
+$forum_count = 0; // for $subforums->get_option()
+$subforums_tab = 7; // for $subforums->get_option()
 while ($parent_forum = $forum_db->fetch_assoc($subforums_result)) {
 	if ($parent_forum['cid'] != $parent_category) { // New category since last iteration
 		if ($parent_category) {
@@ -543,7 +501,7 @@ while ($parent_forum = $forum_db->fetch_assoc($subforums_result)) {
 		($parent_forum['fid'] == $cur_forum['parent_id'] ? ' selected="selected"' : '') .
 		($parent_forum['fid'] == $forum_id ? ' class="option-subforums-self"' : '') .
 		'>' . forum_htmlencode($parent_forum['forum_name']) . '</option>';
-	echo subforums_option($parent_forum['fid'], 1, $cur_forum['parent_id'], $forum_id);
+	echo $subforums->get_option($parent_forum['fid'], 1, $cur_forum['parent_id'], $forum_id);
 }
 echo '</optgroup></select></span></div></div>';
 
@@ -591,11 +549,8 @@ if (isset($_POST['parent_id'])) {
 	if ($forum_id != $subforums_parent_id) {
 		$query['SET'] .= ', parent_id = ' . $subforums_parent_id;
 	}
-	if (!isset($subforums)) {
-		$subforums = subforums_get();
-	}
 	$subforums_marked = array();
-	subforums_get_cat($forum_id);
+	$subforums->get_cat();
 	if (!empty($subforums_marked)) {
 		$subforums_query = array(
 			'UPDATE' => 'forums',
@@ -624,38 +579,33 @@ if (!isset($form['subforums_create_link']) || $form['subforums_create_link'] != 
 
 		<hook id="aop_features_pre_general_fieldset_end"><![CDATA[
 
-// Load extension language file
-if (file_exists($ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php')) {
-	require $ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php';
-}
-else {
-	require $ext_info['path'] . '/lang/English/' . $ext_info['id'] . '.php';
-}
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 // Show checkbox for plain view
 echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">' .
 	'<div class="sf-box checkbox">' .
 	'<span class="fld-input"><input type="checkbox" id="fld' . (++$forum_page['fld_count']) .'" name="form[subforums_plain_view]" value="1"' . (($forum_config['o_subforums_plain_view'] == '1') ? ' checked="checked"' : '') .' /></span>' .
-	'<label for="fld'. $forum_page['fld_count'] . '"><span>' . $lang_xn_subforums['Plain view'] . '</span>' . $lang_xn_subforums['Plain view label'] . '</label>' .
+	'<label for="fld'. $forum_page['fld_count'] . '"><span>' . $subforums->lang['Plain view'] . '</span>' . $subforums->lang['Plain view label'] . '</label>' .
 	'</div></div>';
 // Show mode selection
 echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">'
 	. '<div class="sf-box checkbox">'
 	. '<span class="fld-input"><select id="fld' . (++$forum_page['fld_count']) .'" name="form[subforums_show_list]">';
-if (!empty($lang_xn_subforums['Show clear']))
-	echo '<option value="0"' . (($forum_config['o_subforums_show_list'] == '0') ? ' selected="selected"' : '') . '>' . $lang_xn_subforums['Show clear'] . '</option>';
-if (!empty($lang_xn_subforums['Show list']))
-	echo '<option value="1"' . (($forum_config['o_subforums_show_list'] == '1') ? ' selected="selected"' : '') . '>' . $lang_xn_subforums['Show list'] . '</option>';
-if (!empty($lang_xn_subforums['Show descriptions']))
-	echo '<option value="2"' . (($forum_config['o_subforums_show_list'] == '2') ? ' selected="selected"' : '') . '>' . $lang_xn_subforums['Show descriptions'] . '</option>';
+if (!empty($subforums->lang['Show clear']))
+	echo '<option value="0"' . (($forum_config['o_subforums_show_list'] == '0') ? ' selected="selected"' : '') . '>' . $subforums->lang['Show clear'] . '</option>';
+if (!empty($subforums->lang['Show list']))
+	echo '<option value="1"' . (($forum_config['o_subforums_show_list'] == '1') ? ' selected="selected"' : '') . '>' . $subforums->lang['Show list'] . '</option>';
+if (!empty($subforums->lang['Show descriptions']))
+	echo '<option value="2"' . (($forum_config['o_subforums_show_list'] == '2') ? ' selected="selected"' : '') . '>' . $subforums->lang['Show descriptions'] . '</option>';
 echo '</select></span>'
-	. '<label for="fld'. $forum_page['fld_count'] . '"><span>' . $lang_xn_subforums['Show mode label'] . '</span></label>'
+	. '<label for="fld'. $forum_page['fld_count'] . '"><span>' . $subforums->lang['Show mode label'] . '</span></label>'
 	. '</div></div>';
 // Show checkbox for quick create
 echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">'
 	. '<div class="sf-box checkbox">'
 	. '<span class="fld-input"><input type="checkbox" id="fld' . (++$forum_page['fld_count']) .'" name="form[subforums_create_link]" value="1"' . (($forum_config['o_subforums_create_link'] == '1') ? ' checked="checked"' : '') .' /></span>'
-	. '<label for="fld'. $forum_page['fld_count'] . '"><span>' . $lang_xn_subforums['Quick create'] . '</span>' . $lang_xn_subforums['Quick create label'] . '</label>'
+	. '<label for="fld'. $forum_page['fld_count'] . '"><span>' . $subforums->lang['Quick create'] . '</span>' . $subforums->lang['Quick create label'] . '</label>'
 	. '</div></div>';
 
 		]]></hook>
@@ -668,13 +618,8 @@ $form['show_subforums_list'] = isset($_POST['form']['show_subforums_list']) ? in
 
 		<hook id="pf_change_details_settings_pre_image_display_fieldset"><![CDATA[
 
-// Load extension language file
-if (file_exists($ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php')) {
-	require $ext_info['path'] . '/lang/' . $forum_user['language'] . '/' . $ext_info['id'] . '.php';
-}
-else {
-	require $ext_info['path'] . '/lang/English/' . $ext_info['id'] . '.php';
-}
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
 // Add mode selection
 ?>
@@ -682,24 +627,24 @@ else {
 					<div class="sf-box checkbox">
 						<span class="fld-input"><select id="fld<?php echo ++$forum_page['fld_count'] ?>" name="form[show_subforums_list]">
 <?php
-if (!empty($lang_xn_subforums['Show clear'])) {
+if (!empty($subforums->lang['Show clear'])) {
 ?>
-							<option value="0" <?php if ($user['show_subforums_list'] == 0) echo 'selected="selected" ' ?>><?php echo $lang_xn_subforums['Show clear'] ?></option>
+							<option value="0" <?php if ($user['show_subforums_list'] == 0) echo 'selected="selected" ' ?>><?php echo $subforums->lang['Show clear'] ?></option>
 <?php
 }
-if (!empty($lang_xn_subforums['Show list'])) {
+if (!empty($subforums->lang['Show list'])) {
 ?>
-							<option value="1" <?php if ($user['show_subforums_list'] == 1) echo 'selected="selected" ' ?>><?php echo $lang_xn_subforums['Show list'] ?></option>
+							<option value="1" <?php if ($user['show_subforums_list'] == 1) echo 'selected="selected" ' ?>><?php echo $subforums->lang['Show list'] ?></option>
 <?php
 }
-if (!empty($lang_xn_subforums['Show descriptions'])) {
+if (!empty($subforums->lang['Show descriptions'])) {
 ?>
-							<option value="2" <?php if ($user['show_subforums_list'] == 2) echo 'selected="selected" ' ?>><?php echo $lang_xn_subforums['Show descriptions'] ?></option>
+							<option value="2" <?php if ($user['show_subforums_list'] == 2) echo 'selected="selected" ' ?>><?php echo $subforums->lang['Show descriptions'] ?></option>
 <?php
 }
 ?>
 						</select></span>
-						<label for="fld<?php echo $forum_page['fld_count'] ?>"><span><?php echo $lang_xn_subforums['Show mode label'] ?></span></label>
+						<label for="fld<?php echo $forum_page['fld_count'] ?>"><span><?php echo $subforums->lang['Show mode label'] ?></span></label>
 					</div>
 				</div>
 <?php
@@ -717,11 +662,8 @@ $query['WHERE'] = '(' . $query['WHERE'] . ') AND f.parent_id = 0';
 // Empty variable for <ch_fn_generate_quickjump_cache_forum_loop_start>
 $subforums_parent_id = 0;
 
-// Get subforums table
-require_once $ext_info['path'] . '/functions.php';
-if (!isset($subforums)) {
-	$subforums = subforums_get();
-}
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 */
 
 		]]></hook>
@@ -730,8 +672,8 @@ if (!isset($subforums)) {
 
 /*
 // Add subforums with tabs
-$subforums_tab = 7; // for subforums_option()
-$output .= subforums_option($subforums_parent_id, 1);
+$subforums_tab = 7; // for $subforums->get_option()
+$output .= $subforums->get_option($subforums_parent_id, 1);
 
 // Get new parent id
 $subforums_parent_id = $cur_forum['parent_id'];
@@ -748,23 +690,16 @@ $query['VALUES'] .= ', ' . $forum_config['o_subforums_show_list'];
 
 		<hook id="fn_sync_forum_qr_get_forum_stats"><![CDATA[
 
-// Load functions file
-require_once $ext_info['path'] . '/functions.php';
+// Load subforums class
+require_once $ext_info['path'] . '/subforums.class.php';
 
-// Get subforums table
-if (!isset($subforums)) {
-	$subforums = subforums_get();
-}
-
-$subforums_tree = subforums_tree($forum_id);
-
-$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums_tree) . ')';
+$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ')';
 
 		]]></hook>
 
 		<hook id="fn_sync_forum_qr_get_forum_last_post_data"><![CDATA[
 
-$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums_tree) . ') AND t.moved_to is NULL';
+$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ') AND t.moved_to is NULL';
 
 		]]></hook>
 
