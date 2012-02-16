@@ -25,6 +25,7 @@ class Subforums
 
 		$this->tree = false;
 		$this->cat = false;
+		$this->option_count = 0;
 
 		$this->list = $this->get_list();
 	}
@@ -97,23 +98,28 @@ class Subforums
 	}
 
 
+	public function clear_option_count()
+	{
+		$this->option_count = 0;
+	}
+
+
 	public function get_option($fid, $level, $selected_id = 0, $self_id = 0)
 	{
-		global $forum_url, $forum_count, $sef_friendly_names, $subforums_tab;
+		global $forum_url, $sef_friendly_names;
 
 		$s = '';
 		if (!empty($this->list[$fid])) {
 			foreach ($this->list[$fid] as $cur_subforum) {
 				$sef_friendly_names[$cur_subforum['fid']] = sef_friendly($cur_subforum['forum_name']);
 				$redirect_tag = ($cur_subforum['redirect_url'] != '') ? ' &gt;&gt;&gt;' : '';
-				$s .= $this->padleft($subforums_tab, "\t") .
-					'<option value="' . $cur_subforum['fid'] . '"' .
+				$s .= '<option value="' . $cur_subforum['fid'] . '"' .
 					($selected_id == $cur_subforum['fid'] ? ' selected="selected"' : '') .
 					($cur_subforum['fid'] == $self_id ? ' class="option-subforums-self"' : '') .
 					'>' . $this->padleft($level, '&nbsp;&nbsp;') . '↳ ' .
 					forum_htmlencode($cur_subforum['forum_name']) . $redirect_tag .
 					'</option>';
-				$forum_count++;
+				$this->option_count++;
 				$s .= $this->get_option($cur_subforum['fid'], $level + 1, $selected_id, $self_id);
 			}
 		}

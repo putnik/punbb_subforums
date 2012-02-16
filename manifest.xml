@@ -4,24 +4,17 @@
 <extension engine="1.0">
 	<id>subforums</id>
 	<title>Subforums</title>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<description>Add multilevel subforums. See options in Administration → Settings → Features.</description>
 	<author>Sergey "putnik" Leschina</author>
 	<minversion>1.4</minversion>
 	<maxtestedon>1.4.2</maxtestedon>
 
 	<install><![CDATA[
+
 // Add field for parent forum
-if (!$forum_db->field_exists('forums', 'parent_id'))
-{
+if (!$forum_db->field_exists('forums', 'parent_id')) {
 	$forum_db->add_field('forums', 'parent_id', 'INT(10) UNSIGNED', false, '0');
-	if ($forum_db->field_exists('forums', 'pun_subforums_parent_id')) { // FOR DELETE !!!
-		$subforums_query = array(
-			'UPDATE' => 'forums',
-			'SET'    => 'parent_id = pun_subforums_parent_id'
-		);
-		$forum_db->query_build($subforums_query) or error(__FILE__, __LINE__);
-	}
 }
 
 // Add field for show/hide subforums on index.php for each user
@@ -36,13 +29,10 @@ if (!$forum_db->field_exists('users', 'show_subforums_list'))
 		$forum_db->query_build($query) or error(__FILE__, __LINE__);
 	}
 }
-// Drop old field
-if ($forum_db->field_exists('users', 'show_subforums_desc')) {
-	$forum_db->drop_field('users', 'show_subforums_desc');
-}
 
 // Add extension options to the config table
-if (!isset($forum_config['o_subforums_plain_view'])) { // Plain or full view of subforums on viewforum.php
+// * Plain or full view of subforums on viewforum.php
+if (!isset($forum_config['o_subforums_plain_view'])) {
 	$query = array(
 		'INSERT' => 'conf_name, conf_value',
 		'INTO'   => 'config',
@@ -50,20 +40,10 @@ if (!isset($forum_config['o_subforums_plain_view'])) { // Plain or full view of 
 	);
 	$forum_db->query_build($query) or error(__FILE__, __LINE__);
 }
-if (!isset($forum_config['o_subforums_show_list'])) { // Show subforums (& their descriptions) on index.php
-	$subforums_show_list = 1; // 1 - list w/o descriptions
-	if (isset($forum_config['o_subforums_show_desc'])) {
-		if ($forum_config['o_subforums_show_desc'] == 1) {
-			$subforums_show_list = 2; // 2 - list with descriptions
-		}
 
-		// Delete old option from the config
-		$query = array(
-			'DELETE' => 'config',
-			'WHERE'  => 'conf_name=\'o_subforums_show_desc\'',
-		);
-		$forum_db->query_build($query) or error(__FILE__, __LINE__);
-	}
+// * Show subforums (& their descriptions) on index.php
+if (!isset($forum_config['o_subforums_show_list'])) {
+	$subforums_show_list = 1; // 1 - list w/o descriptions
 	$query = array(
 		'INSERT' => 'conf_name, conf_value',
 		'INTO'   => 'config',
@@ -71,7 +51,9 @@ if (!isset($forum_config['o_subforums_show_list'])) { // Show subforums (& their
 	);
 	$forum_db->query_build($query) or error(__FILE__, __LINE__);
 }
-if (!isset($forum_config['o_subforums_create_link'])) { // Show create link on viewforum.php
+
+// * Show create link on viewforum.php
+if (!isset($forum_config['o_subforums_create_link'])) {
 	$query = array(
 		'INSERT' => 'conf_name, conf_value',
 		'INTO'   => 'config',
@@ -94,14 +76,11 @@ if ($forum_db->field_exists('forums', 'parent_id')) {
 if ($forum_db->field_exists('users', 'show_subforums_list')) {
 	$forum_db->drop_field('users', 'show_subforums_list');
 }
-if ($forum_db->field_exists('users', 'show_subforums_desc')) {
-	$forum_db->drop_field('users', 'show_subforums_desc');
-}
 
 // Delete extension options from the config
 $query = array(
 	'DELETE' => 'config',
-	'WHERE'  => 'conf_name IN ( \'o_subforums_show_list\', \'o_subforums_show_desc\', \'o_subforums_create_link\')',
+	'WHERE'  => 'conf_name IN (\'o_subforums_show_list\', \'o_subforums_show_desc\', \'o_subforums_create_link\')',
 );
 $forum_db->query_build($query) or error(__FILE__, __LINE__);
 
@@ -223,7 +202,7 @@ if ($forum_config['o_subforums_plain_view'] != 1 && ($forum_db->num_rows($subfor
 
 	while ($sub_forum = $forum_db->fetch_assoc($subforums_result)) {
 		// Forums
-		echo '<div id="subforum'. $sub_forum['fid'] .'" class="vf-subforum main-item' . (!empty($forum_page['item_style']) ? $forum_page['item_style'] : '') . '">'; // FIXIT
+		echo '<div id="subforum'. $sub_forum['fid'] .'" class="vf-subforum main-item' . (!empty($forum_page['item_style']) ? $forum_page['item_style'] : '') . '">'; // FIXME
 
 		// Isn't this a redirect forum?
 		if ($sub_forum['redirect_url'] == '') {
@@ -263,7 +242,7 @@ if ($forum_config['o_subforums_plain_view'] == 1 && ($forum_db->num_rows($subfor
 
 	while ($sub_forum = $forum_db->fetch_assoc($subforums_result)) {
 		// Forums
-		echo '<div id="subforum'. $sub_forum['fid'] .'" class="vf-subforum main-item' . (!empty($forum_page['item_style']) ? $forum_page['item_style'] : '') . '">'; // FIXIT
+		echo '<div id="subforum'. $sub_forum['fid'] .'" class="vf-subforum main-item' . (!empty($forum_page['item_style']) ? $forum_page['item_style'] : '') . '">'; // FIXME
 
 		($hook = get_hook('xn_subforums_vf_pre_icon')) ? (defined('FORUM_USE_INCLUDE') ? include $hook : eval($hook)) : null;
 
@@ -297,7 +276,7 @@ if ($forum_config['o_subforums_plain_view'] == 1 && ($forum_db->num_rows($subfor
 
 	while ($sub_forum = $forum_db->fetch_assoc($subforums_result)) 	{
 		// Forums
-		echo '<div id="subforum'. $sub_forum['fid'] .'" class="vf-subforum main-item' . (!empty($forum_page['item_style']) ? $forum_page['item_style'] : '') . '">'; // FIXIT
+		echo '<div id="subforum'. $sub_forum['fid'] .'" class="vf-subforum main-item' . (!empty($forum_page['item_style']) ? $forum_page['item_style'] : '') . '">'; // FIXME
 
 		($hook = get_hook('xn_subforums_vf_pre_icon')) ? (defined('FORUM_USE_INCLUDE') ? include $hook : eval($hook)) : null;
 
@@ -411,8 +390,7 @@ if (!isset($parent_id)) {
 	$subforums_result = $forum_db->query_build($subforums_query) or error(__FILE__, __LINE__);
 
 	$parent_category = 0;
-	$forum_count = 0; // for $subforums->get_option()
-	$subforums_tab = 7; // for $subforums->get_option()
+	$subforums->clear_option_count();
 	while ($cur_parent_forum = $forum_db->fetch_assoc($subforums_result)) {
 		if ($cur_parent_forum['cid'] != $parent_category) { // New category since last iteration
 			if ($parent_category) {
@@ -444,10 +422,10 @@ if (isset($parent_id)) {
 	$query['JOINS'] = array(
 		array(
 			'INNER JOIN' => 'forums AS f',
-			'ON'         => 'c.id=f.cat_id'
+			'ON'         => 'c.id = f.cat_id'
 		)
 	);
-	$query['WHERE'] = 'f.id=' . $parent_id;
+	$query['WHERE'] = 'f.id = ' . $parent_id;
 }
 
 		]]></hook>
@@ -487,8 +465,7 @@ $subforums_query = array(
 );
 $subforums_result = $forum_db->query_build($subforums_query) or error(__FILE__, __LINE__);
 $parent_category = 0;
-$forum_count = 0; // for $subforums->get_option()
-$subforums_tab = 7; // for $subforums->get_option()
+$subforums->clear_option_count();
 while ($parent_forum = $forum_db->fetch_assoc($subforums_result)) {
 	if ($parent_forum['cid'] != $parent_category) { // New category since last iteration
 		if ($parent_category) {
@@ -592,12 +569,15 @@ echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">' .
 echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">'
 	. '<div class="sf-box checkbox">'
 	. '<span class="fld-input"><select id="fld' . (++$forum_page['fld_count']) .'" name="form[subforums_show_list]">';
-if (!empty($subforums->lang['Show clear']))
+if (!empty($subforums->lang['Show clear'])) {
 	echo '<option value="0"' . (($forum_config['o_subforums_show_list'] == '0') ? ' selected="selected"' : '') . '>' . $subforums->lang['Show clear'] . '</option>';
-if (!empty($subforums->lang['Show list']))
+}
+if (!empty($subforums->lang['Show list'])) {
 	echo '<option value="1"' . (($forum_config['o_subforums_show_list'] == '1') ? ' selected="selected"' : '') . '>' . $subforums->lang['Show list'] . '</option>';
-if (!empty($subforums->lang['Show descriptions']))
+}
+if (!empty($subforums->lang['Show descriptions'])) {
 	echo '<option value="2"' . (($forum_config['o_subforums_show_list'] == '2') ? ' selected="selected"' : '') . '>' . $subforums->lang['Show descriptions'] . '</option>';
+}
 echo '</select></span>'
 	. '<label for="fld'. $forum_page['fld_count'] . '"><span>' . $subforums->lang['Show mode label'] . '</span></label>'
 	. '</div></div>';
@@ -672,7 +652,6 @@ require_once $ext_info['path'] . '/subforums.class.php';
 
 /*
 // Add subforums with tabs
-$subforums_tab = 7; // for $subforums->get_option()
 $output .= $subforums->get_option($subforums_parent_id, 1);
 
 // Get new parent id
