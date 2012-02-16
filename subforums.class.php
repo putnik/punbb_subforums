@@ -7,6 +7,13 @@ if (!defined('FORUM')) {
 
 class Subforums
 {
+	public $lang;
+	private $fid;
+	private $tree = false;
+	private $cat = false;
+	private $option_count = 0;
+	private $list;
+
 	function __construct()
 	{
 		global $forum_id;
@@ -22,10 +29,6 @@ class Subforums
 
 		$this->lang = $lang_xn_subforums;
 		$this->fid = $forum_id;
-
-		$this->tree = false;
-		$this->cat = false;
-		$this->option_count = 0;
 
 		$this->list = $this->get_list();
 	}
