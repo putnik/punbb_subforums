@@ -4,7 +4,7 @@
 <extension engine="1.0">
 	<id>subforums</id>
 	<title>Subforums</title>
-	<version>1.0.5</version>
+	<version>1.0.6</version>
 	<description>Add multilevel subforums. See options in Administration → Settings → Features.</description>
 	<author>Sergey "putnik" Leschina</author>
 	<minversion>1.4</minversion>
@@ -569,6 +569,13 @@ echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">'
 	. '<span class="fld-input"><input type="checkbox" id="fld' . (++$forum_page['fld_count']) .'" name="form[subforums_create_link]" value="1"' . (($forum_config['o_subforums_create_link'] == '1') ? ' checked="checked"' : '') .' /></span>'
 	. '<label for="fld'. $forum_page['fld_count'] . '"><span>' . $subforums->lang['Quick create'] . '</span>' . $subforums->lang['Quick create label'] . '</label>'
 	. '</div></div>';
+
+		]]></hook>
+
+		<hook id="mr_move_topics_qr_get_target_forums"><![CDATA[
+
+// Multilevel sorting
+$subforums->multisort_query($query);
 
 		]]></hook>
 
