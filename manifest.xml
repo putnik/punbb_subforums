@@ -4,7 +4,7 @@
 <extension engine="1.0">
 	<id>subforums</id>
 	<title>Subforums</title>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 	<description>Add multilevel subforums. See options in Administration → Settings → Features.</description>
 	<author>Sergey "putnik" Leschina</author>
 	<minversion>1.4</minversion>
@@ -493,7 +493,35 @@ $query['VALUES'] .= ', ' . $subforums_parent_id;
 		<hook id="afo_qr_get_cats_and_forums"><![CDATA[
 
 if (isset($parent_id)) {
+	// Display none
 	$query['WHERE'] = '1 = 0';
+}
+else {
+	// Multilevel sorting
+	$query['JOINS'][] = array(
+		'LEFT JOIN' => 'forums AS f2',
+		'ON'        => 'f.parent_id = f2.id'
+		);
+	$query['JOINS'][] = array(
+		'LEFT JOIN' => 'forums AS f3',
+		'ON'        => 'f2.parent_id = f3.id'
+		);
+	$query['JOINS'][] = array(
+		'LEFT JOIN' => 'forums AS f4',
+		'ON'        => 'f3.parent_id = f4.id'
+		);
+
+	$query['SELECT'] .= ',
+		IFNULL(f4.disp_position, IFNULL(f3.disp_position, IFNULL(f2.disp_position, f.disp_position))) * 1000000000 +
+		IF(f4.disp_position IS NOT NULL, f3.disp_position,
+			IF(f3.disp_position IS NOT NULL, f2.disp_position,
+				IF(f2.disp_position IS NOT NULL, f.disp_position, 0))) * 1000000 +
+		IF(f4.disp_position IS NOT NULL, f2.disp_position,
+			IF(f3.disp_position IS NOT NULL, f.disp_position, 0)) * 1000 +
+		IF(f4.disp_position IS NOT NULL, f.disp_position, 0)
+		AS f_disp_position';
+
+	$query['ORDER BY'] = str_replace('f.disp_position', 'f_disp_position', $query['ORDER BY']);
 }
 
 		]]></hook>
