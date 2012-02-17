@@ -207,6 +207,35 @@ class Subforums
 		}
 		return $this->tree;
 	}
+
+
+	public function multisort_query(&$query)
+	{
+		$query['JOINS'][] = array(
+			'LEFT JOIN' => 'forums AS f2',
+			'ON'        => 'f.parent_id = f2.id'
+			);
+		$query['JOINS'][] = array(
+			'LEFT JOIN' => 'forums AS f3',
+			'ON'        => 'f2.parent_id = f3.id'
+			);
+		$query['JOINS'][] = array(
+			'LEFT JOIN' => 'forums AS f4',
+			'ON'        => 'f3.parent_id = f4.id'
+			);
+
+		$query['SELECT'] .= ',
+			IFNULL(f4.disp_position, IFNULL(f3.disp_position, IFNULL(f2.disp_position, f.disp_position))) * 1000000000 +
+			IF(f4.disp_position IS NOT NULL, f3.disp_position,
+				IF(f3.disp_position IS NOT NULL, f2.disp_position,
+					IF(f2.disp_position IS NOT NULL, f.disp_position, 0))) * 1000000 +
+			IF(f4.disp_position IS NOT NULL, f2.disp_position,
+				IF(f3.disp_position IS NOT NULL, f.disp_position, 0)) * 1000 +
+			IF(f4.disp_position IS NOT NULL, f.disp_position, 0)
+			AS f_disp_position';
+
+		$query['ORDER BY'] = str_replace('f.disp_position', 'f_disp_position', $query['ORDER BY']);
+	}
 }
 
 
