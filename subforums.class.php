@@ -209,7 +209,7 @@ class Subforums
 	}
 
 
-	public function multisort_query(&$query)
+	public function multilevel_query(&$query)
 	{
 		$query['JOINS'][] = array(
 			'LEFT JOIN' => 'forums AS f2',
@@ -224,6 +224,7 @@ class Subforums
 			'ON'        => 'f3.parent_id = f4.id'
 			);
 
+		$query['SELECT'] = str_replace('f.forum_name', "IF(f2.id IS NULL, f.forum_name, CONCAT(LPAD('', IF(f2.id IS NULL, 0, 2) + IF(f3.id IS NULL, 0, 2) + IF(f4.id IS NULL, 0, 2), ' '), '↳ ', f.forum_name)) AS forum_name", $query['SELECT']);
 		$query['SELECT'] .= ',
 			IFNULL(f4.disp_position, IFNULL(f3.disp_position, IFNULL(f2.disp_position, f.disp_position))) * 1000000000 +
 			IF(f4.disp_position IS NOT NULL, f3.disp_position,

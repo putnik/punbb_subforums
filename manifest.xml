@@ -4,7 +4,7 @@
 <extension engine="1.0">
 	<id>subforums</id>
 	<title>Subforums</title>
-	<version>1.0.6</version>
+	<version>1.0.7</version>
 	<description>Add multilevel subforums. See options in Administration → Settings → Features.</description>
 	<author>Sergey "putnik" Leschina</author>
 	<minversion>1.4</minversion>
@@ -498,7 +498,7 @@ if (isset($parent_id)) {
 }
 else {
 	// Multilevel sorting
-	$subforums->multisort_query($query);
+	$subforums->multilevel_query($query);
 }
 
 		]]></hook>
@@ -575,7 +575,7 @@ echo '<div class="sf-set set' . (++$forum_page['item_count']) . '">'
 		<hook id="mr_move_topics_qr_get_target_forums"><![CDATA[
 
 // Multilevel sorting
-$subforums->multisort_query($query);
+$subforums->multilevel_query($query);
 
 		]]></hook>
 
@@ -623,7 +623,7 @@ $query['SELECT'] .= ', f.parent_id';
 
 // Multilevel sorting
 global $subforums;
-$subforums->multisort_query($query);
+$subforums->multilevel_query($query);
 
 // Remove subforums with level 4 and more
 $query['WHERE'] = '(' . $query['WHERE'] . ') AND (f4.parent_id IS NULL OR f4.parent_id = 0)';
