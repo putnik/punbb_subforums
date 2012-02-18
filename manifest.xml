@@ -639,13 +639,13 @@ $query['VALUES'] .= ', ' . $forum_config['o_subforums_show_list'];
 
 		<hook id="fn_sync_forum_qr_get_forum_stats"><![CDATA[
 
-$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ')';
+//$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ')';
 
 		]]></hook>
 
 		<hook id="fn_sync_forum_qr_get_forum_last_post_data"><![CDATA[
 
-$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ') AND t.moved_to is NULL';
+//$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ') AND t.moved_to is NULL';
 
 		]]></hook>
 
