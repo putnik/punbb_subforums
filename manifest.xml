@@ -4,7 +4,7 @@
 <extension engine="1.0">
 	<id>subforums</id>
 	<title>Subforums</title>
-	<version>1.0.7</version>
+	<version>1.0.8</version>
 	<description>Add multilevel subforums. See options in Administration → Settings → Features.</description>
 	<author>Sergey "putnik" Leschina</author>
 	<minversion>1.4</minversion>
@@ -639,13 +639,14 @@ $query['VALUES'] .= ', ' . $forum_config['o_subforums_show_list'];
 
 		<hook id="fn_sync_forum_qr_get_forum_stats"><![CDATA[
 
-//$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ')';
+global $subforums;
+$query['WHERE'] = str_replace('t.forum_id='.$forum_id, 't.forum_id IN (' . implode(', ', $subforums->get_tree($forum_id)) . ')', $query['WHERE']);
 
 		]]></hook>
 
 		<hook id="fn_sync_forum_qr_get_forum_last_post_data"><![CDATA[
 
-//$query['WHERE'] = 't.forum_id IN (' . implode(', ', $subforums->get_tree()) . ') AND t.moved_to is NULL';
+$query['WHERE'] = str_replace('t.forum_id='.$forum_id, 't.forum_id IN (' . implode(', ', $subforums->get_tree($forum_id)) . ')', $query['WHERE']);
 
 		]]></hook>
 

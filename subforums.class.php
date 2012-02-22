@@ -9,7 +9,7 @@ class Subforums
 {
 	public $lang;
 	private $fid;
-	private $tree = false;
+	private $tree = array();
 	private $cat = false;
 	private $option_count = 0;
 	private $list;
@@ -187,25 +187,18 @@ class Subforums
 	}
 
 
-	private function get_subtree($fid)
+	public function get_tree($fid)
 	{
-		$tree = array();
-		$tree[] = $fid;
-		if (!empty($this->list[$fid])) {
-			foreach ($this->list[$fid] as $cur_subforum) {
-				$tree += $this->get_tree($cur_subforum['fid']);
+		if (!isset($this->tree[$fid])) {
+			$this->tree[$fid] = array();
+			$this->tree[$fid][] = $fid;
+			if (!empty($this->list[$fid])) {
+				foreach ($this->list[$fid] as $cur_subforum) {
+					$this->tree[$fid] = array_merge($this->tree[$fid], $this->get_tree($cur_subforum['fid']));
+				}
 			}
 		}
-		return $tree;
-	}
-
-
-	public function get_tree()
-	{
-		if (!$this->tree) {
-			$this->tree = $this->get_subtree($this->fid);
-		}
-		return $this->tree;
+		return $this->tree[$fid];
 	}
 
 
